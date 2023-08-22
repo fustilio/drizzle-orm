@@ -1,10 +1,10 @@
 {
   "name": "drizzle-orm",
-  "version": "0.28.2",
+  "version": "0.28.3",
   "description": "Drizzle ORM package for SQL databases",
   "type": "module",
   "scripts": {
-    "build": "scripts/build.ts",
+    "build": "tsx scripts/build.ts",
     "b": "pnpm build",
     "test:types": "cd type-tests && tsc",
     "test": "vitest run",

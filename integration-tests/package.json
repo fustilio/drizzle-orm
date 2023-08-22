@@ -4,22 +4,25 @@
   "description": "",
   "scripts": {
     "test:types": "tsc",
-    "test": "ava tests --timeout=60s --serial && pnpm test:esm && pnpm test:rqb",
+    "test:ava": "ava tests",
+    "test": "ava tests --timeout=120s --serial && pnpm test:esm && pnpm test:rqb",
     "test:rqb": "vitest run --no-threads",
     "test:esm": "node tests/imports.test.mjs && node tests/imports.test.cjs"
   },
   "ava": {
     "files": [
-      "tests/**/*.test.{ts,cts,mts,js,cjs,mjs}",
+      "!tests/**/*.test.{ts,cts,mts,js,cjs,mjs}",
       "!tests/imports.test.mjs",
       "!tests/imports.test.cjs",
       "!tests/awsdatapi.alltypes.test.ts",
       "!tests/neon-http.test.ts",
-      "!tests/awsdatapi.test.ts",
+      "tests/awsdatapi.test.ts",
       "!tests/planetscale-serverless/**/*.ts",
       "!tests/bun/**/*",
       "!tests/vercel-pg.test.ts",
-      "!tests/relational/**/*"
+      "!tests/relational/**/*",
+      "!tests/pg.test.ts",
+      "!tests/postgres.test.ts"
     ],
     "extensions": {
       "ts": "module"

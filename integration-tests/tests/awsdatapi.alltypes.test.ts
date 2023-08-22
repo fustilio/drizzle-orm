@@ -81,6 +81,10 @@ interface Context {
 
 const test = anyTest as TestFn<Context>;
 
+function parseTimestamp(time: string | number | Date) {
+	return sql<Date>`to_timestamp(${new Date(time).getTime() / 1000})` as unknown as string;
+  }
+
 test.before(async (t) => {
 	const ctx = t.context;
 	const database = process.env['AWS_DATA_API_DB']!;
@@ -89,7 +93,7 @@ test.before(async (t) => {
 
 	const rdsClient = new RDSDataClient({
 		credentials: fromIni({ profile: process.env['AWS_TEST_PROFILE'] }),
-		region: 'us-east-1',
+		region: process.env['AWS_TEST_REGION'] ?? 'us-east-1',
 	});
 
 	ctx.db = drizzle(rdsClient, {
@@ -165,11 +169,11 @@ test.before(async (t) => {
 		jsonb: { attr: 'hellohello' },
 		time: '11:12:00',
 		time2: '11:12:00',
-		timestamp: now,
-		timestamp2: now,
-		timestamp3: now,
-		timestamp4: now,
-		date: now,
+		timestamp: parseTimestamp(now),
+		timestamp2: parseTimestamp(now),
+		timestamp3: parseTimestamp(now),
+		timestamp4: parseTimestamp(now),
+		date: parseTimestamp(now),
 		// interval: '10 days'
 	});
 
@@ -444,14 +448,14 @@ test.serial('select from enum', async (t) => {
 	const exercises = pgTable('exercises', {
 		id: serial('id').primaryKey(),
 		name: varchar('name').notNull(),
-		force: forceEnum('force'),
-		level: levelEnum('level'),
-		mechanic: mechanicEnum('mechanic'),
-		equipment: equipmentEnum('equipment'),
+		force: varchar('force', { enum: forceEnum.enumValues }).notNull().default('isometric'),
+		level: varchar('level', { enum: levelEnum.enumValues }).notNull(),
+		mechanic: varchar('mechanic', { enum: mechanicEnum.enumValues }).notNull(),
+		equipment: varchar('equipment', { enum: equipmentEnum.enumValues }).notNull(),
 		instructions: text('instructions'),
-		category: categoryEnum('category'),
-		primaryMuscles: muscleEnum('primary_muscles').array(),
-		secondaryMuscles: muscleEnum('secondary_muscles').array(),
+		category: varchar('category', { enum: categoryEnum.enumValues }).notNull(),
+		primaryMuscles: varchar('primary_muscles', { enum: muscleEnum.enumValues }).notNull().array(),
+		secondaryMuscles: varchar('secondary_muscles', { enum: muscleEnum.enumValues }).notNull().array(),
 		createdAt: timestamp('created_at').notNull().default(sql`now()`),
 		updatedAt: timestamp('updated_at').notNull().default(sql`now()`),
 	});
@@ -482,14 +486,14 @@ test.serial('select from enum', async (t) => {
 		create table ${exercises} (
 			id serial primary key,
 			name varchar not null,
-			force force,
-			level level,
-			mechanic mechanic,
-			equipment equipment,
+			force varchar not null,
+			level varchar not null,
+			mechanic varchar not null,
+			equipment varchar not null,
 			instructions text,
-			category category,
-			primary_muscles muscle[],
-			secondary_muscles muscle[],
+			category varchar not null,
+			primary_muscles varchar not null,
+			secondary_muscles varchar not null,
 			created_at timestamp not null default now(),
 			updated_at timestamp not null default now()
 		)

@@ -1,8 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "build:orm": "turbo run build --filter drizzle-orm --color",
-    "build": "turbo run build test:types //#lint --color",
+    "build:orm": "turbo run build --filter drizzle-orm --color --force",
+    "build": "turbo run build test:types //#lint --color --force",
     "b": "pnpm build",
     "pack": "turbo run pack --color",
     "test": "turbo run test --color",

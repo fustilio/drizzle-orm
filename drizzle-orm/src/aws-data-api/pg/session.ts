@@ -15,14 +15,30 @@ import {
 	PreparedQuery,
 	type PreparedQueryConfig,
 	type QueryResultHKT,
+	type AnyPgTable,
+	serial,
+	text,
+	pgSchema,
+	bigint,
 } from '~/pg-core';
 import type { SelectedFieldsOrdered } from '~/pg-core/query-builders/select.types';
 import { type RelationalSchemaConfig, type TablesRelationalConfig } from '~/relations';
 import { fillPlaceholders, type Query, type QueryTypingsValue, type SQL, sql } from '~/sql';
-import { mapResultRow } from '~/utils';
+import { getTableColumns, mapResultRow, orderSelectedFields } from '~/utils';
 import { getValueFromDataApi, toValueParam } from '../common';
 
 export type AwsDataApiClient = RDSDataClient;
+
+const drizzleSchema = pgSchema("drizzle")
+
+const drizzleMigrations = drizzleSchema.table('__drizzle_migrations', {
+	id: serial('id').primaryKey(),
+	hash: text('hash').notNull(),
+	created_at: bigint('created_at', {
+		mode: 'number'
+	})
+});
+
 
 export class AwsDataApiPreparedQuery<T extends PreparedQueryConfig> extends PreparedQuery<T> {
 	static readonly [entityKind]: string = 'AwsDataApiPreparedQuery';
@@ -49,6 +65,9 @@ export class AwsDataApiPreparedQuery<T extends PreparedQueryConfig> extends Prep
 			database: options.database,
 			transactionId,
 		});
+
+		this.fields = fields;
+
 	}
 
 	async execute(placeholderValues: Record<string, unknown> | undefined = {}): Promise<T['execute']> {
@@ -136,6 +155,12 @@ export class AwsDataApiSession<
 		transactionId?: string,
 		customResultMapper?: (rows: unknown[][]) => T['execute'],
 	): PreparedQuery<T> {
+
+		if (!fields && query.sql.toLowerCase().includes('select')) {
+			const tblCols = getTableColumns<AnyPgTable>(drizzleMigrations)
+			fields = orderSelectedFields(tblCols)
+		}
+
 		return new AwsDataApiPreparedQuery(
 			this.client,
 			query.sql,
