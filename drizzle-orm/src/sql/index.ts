@@ -112,8 +112,12 @@ export class SQL<T = unknown> implements SQLWrapper {
 	}
 
 	toQuery(config: BuildQueryConfig): Query {
+		console.log("toQuery");
 		return tracer.startActiveSpan('drizzle.buildSQL', (span) => {
 			const query = this.buildQueryFromSourceParams(this.queryChunks, config);
+
+			console.log("query", query);
+			console.log("params", query.params);
 			span?.setAttributes({
 				'drizzle.query.text': query.sql,
 				'drizzle.query.params': JSON.stringify(query.params),
@@ -137,19 +141,24 @@ export class SQL<T = unknown> implements SQLWrapper {
 		} = config;
 
 		return mergeQueries(chunks.map((chunk): Query => {
+			console.log("checking out the chunksz")
 			if (is(chunk, StringChunk)) {
+				console.log("is stringchunk")
 				return { sql: chunk.value.join(''), params: [] };
 			}
 
 			if (is(chunk, Name)) {
+				console.log("is Name")
 				return { sql: escapeName(chunk.value), params: [] };
 			}
 
 			if (chunk === undefined) {
+				console.log("is undefined")
 				return { sql: '', params: [] };
 			}
 
 			if (Array.isArray(chunk)) {
+				console.log("is isArray")
 				const result: SQLChunk[] = [new StringChunk('(')];
 				for (const [i, p] of chunk.entries()) {
 					result.push(p);
@@ -162,6 +171,7 @@ export class SQL<T = unknown> implements SQLWrapper {
 			}
 
 			if (is(chunk, SQL)) {
+				console.log("IS SQL");
 				return this.buildQueryFromSourceParams(chunk.queryChunks, {
 					...config,
 					inlineParams: inlineParams || chunk.shouldInlineParams,
@@ -169,6 +179,7 @@ export class SQL<T = unknown> implements SQLWrapper {
 			}
 
 			if (is(chunk, Table)) {
+				console.log("is Table")
 				const schemaName = chunk[Table.Symbol.Schema];
 				const tableName = chunk[Table.Symbol.Name];
 				return {
@@ -180,10 +191,12 @@ export class SQL<T = unknown> implements SQLWrapper {
 			}
 
 			if (is(chunk, Column)) {
+				console.log("is Column")
 				return { sql: escapeName(chunk.table[Table.Symbol.Name]) + '.' + escapeName(chunk.name), params: [] };
 			}
 
 			if (is(chunk, View)) {
+				console.log("is View")
 				const schemaName = chunk[ViewBaseConfig].schema;
 				const viewName = chunk[ViewBaseConfig].name;
 				return {
@@ -195,6 +208,7 @@ export class SQL<T = unknown> implements SQLWrapper {
 			}
 
 			if (is(chunk, Param)) {
+				console.log("is Param")
 				const mappedValue = (chunk.value === null) ? null : chunk.encoder.mapToDriverValue(chunk.value);
 
 				if (is(mappedValue, SQL)) {
@@ -214,14 +228,17 @@ export class SQL<T = unknown> implements SQLWrapper {
 			}
 
 			if (is(chunk, Placeholder)) {
+				console.log("is Placeholder")
 				return { sql: escapeParam(paramStartIndex.value++, chunk), params: [chunk] };
 			}
 
 			if (is(chunk, SQL.Aliased) && chunk.fieldAlias !== undefined) {
+				console.log("is Aliased")
 				return { sql: escapeName(chunk.fieldAlias), params: [] };
 			}
 
 			if (is(chunk, Subquery)) {
+				console.log("is Subquery")
 				if (chunk[SubqueryConfig].isWith) {
 					return { sql: escapeName(chunk[SubqueryConfig].alias), params: [] };
 				}
@@ -237,6 +254,7 @@ export class SQL<T = unknown> implements SQLWrapper {
 			// 	return {sql: escapeParam}
 
 			if (isSQLWrapper(chunk)) {
+				console.log("is isSQLWrapper")
 				return this.buildQueryFromSourceParams([
 					new StringChunk('('),
 					chunk.getSQL(),
@@ -245,6 +263,7 @@ export class SQL<T = unknown> implements SQLWrapper {
 			}
 
 			if (is(chunk, Relation)) {
+				console.log("is Relation")
 				return this.buildQueryFromSourceParams([
 					chunk.sourceTable,
 					new StringChunk('.'),
@@ -253,9 +272,11 @@ export class SQL<T = unknown> implements SQLWrapper {
 			}
 
 			if (inlineParams) {
+				console.log("is inlineParams")
 				return { sql: this.mapInlineParam(chunk, config), params: [] };
 			}
 
+			console.log("is unknown")
 			return { sql: escapeParam(paramStartIndex.value++, chunk), params: [chunk] };
 		}));
 	}

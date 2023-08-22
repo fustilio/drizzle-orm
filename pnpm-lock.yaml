@@ -38,8 +38,8 @@ importers:
         specifier: ^0.19.5
         version: 0.19.5
       drizzle-orm:
-        specifier: workspace:./drizzle-orm/dist
-        version: link:drizzle-orm/dist
+        specifier: workspace:./drizzle-orm/src
+        version: link:drizzle-orm/src
       drizzle-orm-old:
         specifier: npm:drizzle-orm@^0.27.2
         version: /drizzle-orm@0.27.2(bun-types@0.6.7)

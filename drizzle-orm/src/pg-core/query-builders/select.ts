@@ -96,6 +96,7 @@ export class PgSelectBuilder<
 		if (this.fields) {
 			fields = this.fields;
 		} else if (is(source, Subquery)) {
+			console.log("fieldsnull subquery source");
 			// This is required to use the proxy handler to get the correct field values from the subquery
 			fields = Object.fromEntries(
 				Object.keys(source[SubqueryConfig].selection).map((
@@ -103,10 +104,13 @@ export class PgSelectBuilder<
 				) => [key, source[key as unknown as keyof typeof source] as unknown as SelectedFields[string]]),
 			);
 		} else if (is(source, PgViewBase)) {
+			console.log("fieldsnull PgViewBase source");
 			fields = source[ViewBaseConfig].selectedFields as SelectedFields;
 		} else if (is(source, SQL)) {
+			console.log("fieldsnull SQL source");
 			fields = {};
 		} else {
+			console.log("fieldsnull unknown source");
 			fields = getTableColumns<AnyPgTable>(source);
 		}
 

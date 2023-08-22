@@ -64,6 +64,7 @@ async function createDockerDB(): Promise<string> {
 
 beforeAll(async () => {
 	const connectionString = process.env['PG_CONNECTION_STRING'] ?? (await createDockerDB());
+	console.log('trying to connect to postgres', connectionString)
 
 	const sleep = 250;
 	let timeLeft = 5000;
@@ -77,6 +78,7 @@ beforeAll(async () => {
 				},
 			});
 			connected = true;
+			console.log("Connected to Postgres")
 			break;
 		} catch (e) {
 			lastError = e;

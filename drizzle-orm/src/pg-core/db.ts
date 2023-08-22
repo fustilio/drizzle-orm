@@ -41,6 +41,8 @@ export class PgDatabase<
 		readonly session: PgSession<any, any, any>,
 		schema: RelationalSchemaConfig<TSchema> | undefined,
 	) {
+
+		console.log("in db-core:db:PgDatabase", schema)
 		this._ = schema
 			? { schema: schema.schema, tableNamesMap: schema.tableNamesMap }
 			: { schema: undefined, tableNamesMap: {} };

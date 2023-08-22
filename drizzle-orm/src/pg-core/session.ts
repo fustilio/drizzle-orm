@@ -62,6 +62,7 @@ export abstract class PgSession<
 	}
 
 	all<T = unknown>(query: SQL): Promise<T[]> {
+		console.log("pg-core:session.all", query);
 		return this.prepareQuery<PreparedQueryConfig & { all: T[] }>(
 			this.dialect.sqlToQuery(query),
 			undefined,

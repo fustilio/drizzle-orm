@@ -4,7 +4,7 @@ import { entityKind, is } from '~/entity';
 import { DrizzleError } from '~/errors';
 import type { MigrationMeta } from '~/migrator';
 import type { AnyPgColumn } from '~/pg-core/columns';
-import { PgColumn, PgDate, PgJson, PgJsonb, PgNumeric, PgTime, PgTimestamp, PgUUID } from '~/pg-core/columns';
+import { PgColumn, PgDate, PgJson, PgJsonb, PgNumeric, PgTime, PgTimestamp, PgUUID, bigint, serial, text } from '~/pg-core/columns';
 import type { PgDeleteConfig, PgInsertConfig, PgUpdateConfig } from '~/pg-core/query-builders';
 import type { Join, PgSelectConfig, SelectedFieldsOrdered } from '~/pg-core/query-builders/select.types';
 import type { AnyPgTable } from '~/pg-core/table';
@@ -38,6 +38,18 @@ import { orderSelectedFields, type UpdateSet } from '~/utils';
 import { View, ViewBaseConfig } from '~/view';
 import type { PgSession } from './session';
 import { type PgMaterializedView, PgViewBase } from './view';
+// import { pgSchema } from './schema';
+
+// const drizzleSchema = pgSchema("drizzle")
+ 
+// const drizzleMigrations = drizzleSchema.table('__drizzle_migrations', {
+// 	id: serial('id').primaryKey(),
+// 	hash: text('hash').notNull(),
+// 	createdAt: bigint('created_at', {
+// 		mode: 'number'
+// 	})
+// });
+
 
 export class PgDialect {
 	static readonly [entityKind]: string = 'PgDialect';
@@ -57,7 +69,13 @@ export class PgDialect {
 			sql`select id, hash, created_at from "drizzle"."__drizzle_migrations" order by created_at desc limit 1`,
 		);
 
+		// const dbMigrations = await session.prepareQuery.
+
+		// const query = session.prepareQuery()
+
+		console.log("dbMigrations", dbMigrations)
 		const lastDbMigration = dbMigrations[0];
+		console.log("last", dbMigrations[0])
 		await session.transaction(async (tx) => {
 			for await (const migration of migrations) {
 				if (

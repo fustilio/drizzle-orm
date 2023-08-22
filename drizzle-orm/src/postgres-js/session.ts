@@ -62,6 +62,7 @@ export class PostgresJsPreparedQuery<T extends PreparedQueryConfig> extends Prep
 	}
 
 	all(placeholderValues: Record<string, unknown> | undefined = {}): Promise<T['all']> {
+		console.log("postgres-js:all")
 		return tracer.startActiveSpan('drizzle.execute', async (span) => {
 			const params = fillPlaceholders(this.params, placeholderValues);
 			span?.setAttributes({
